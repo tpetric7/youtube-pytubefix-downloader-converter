@@ -6,7 +6,9 @@ This streamlit app:
 - converts videos to mp3 audio, 
 - and extracts subtitles from the videos.
 
-To run this app locally, you need to install streamlit and pytubefix, you may also need ffmpeg and some other dependencies installed on your machine.
+To run this app locally, you need to install `streamlit` and `pytubefix`, you may also need `ffmpeg` and some other dependencies installed on your machine:
+- pip install streamlit
+- pip install pytubefix
 
 After that, you can run the app by typing:
 - cd .../youtube-pytubefix-downloader-converter

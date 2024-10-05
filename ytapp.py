@@ -1,3 +1,4 @@
+# run this app with: streamlit run ytapp.py
 import streamlit as st
 from pytubefix import YouTube, Playlist
 from pathlib import Path

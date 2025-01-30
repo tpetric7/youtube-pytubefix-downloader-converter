@@ -1,4 +1,3 @@
-# run this app with: streamlit run ytapp.py
 import streamlit as st
 from pytubefix import YouTube, Playlist
 from pathlib import Path
@@ -35,7 +34,8 @@ if st.button("Fetch Info"):
                 st.write(f"**Number of Videos:** {len(pl.video_urls)}")
             else:
                 # Handle single video URL
-                yt = YouTube(url)
+                # yt = YouTube(url, use_po_token=True)
+                yt = YouTube(url, 'WEB')
                 st.session_state['yt'] = yt
                 st.write(f"**Title:** {yt.title}")
                 st.image(yt.thumbnail_url)

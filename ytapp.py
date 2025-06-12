@@ -47,7 +47,7 @@ if st.session_state['info']:
             ]
 
         if subtitle_option:
-            command += ["--write-sub", "--write-auto-sub", "--sub-langs", "en,de,es,sl", "--sub-format", "srt"]
+            command += ["--write-sub", "--write-auto-sub", "--sub-langs", "en.*,de,es,sl", "--sub-format", "srt"]
 
         command.append(url)
 

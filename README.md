@@ -3,8 +3,9 @@
 ## New streamlit app
 
 The new streamlit app:
-- downloads Youtube videos 
-- and extracts subtitles from the videos.
+- downloads videos and playlists from Youtube, 
+- converts YouTube videos to mp3 audio,
+- and downloads subtitles of YouTube videos.
 
 Clone or download this repository to your local machine and navigate to the directory where the `ytapp.py` file is located:
 - cd .../youtube-pytubefix-downloader-converter

@@ -1,0 +1,3 @@
+Java Runtime for yt-dlp necessary now:
+npm install -g deno
+npm install -g deno

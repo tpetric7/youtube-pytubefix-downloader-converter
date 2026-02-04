@@ -168,11 +168,14 @@ contain code from other projects with different licenses.
 Most notably, the PyInstaller-bundled executables include GPLv3+
 licensed code, and as such the combined work is licensed under GPLv3+.
 
-See THIRD_PARTY_LICENSES.txt for details.
+The zipimport Unix executable (yt-dlp) contains ISC licensed code from
+meriyah and MIT licensed code from astring.
 
-The zipimport binary (yt-dlp), the source tarball (yt-dlp.tar.gz), and
-the PyPI source distribution & wheel only contain code licensed under
-the Unlicense.
+See THIRD_PARTY_LICENSES.txt for more details.
+
+The git repository, the source tarball (yt-dlp.tar.gz), the PyPI source
+distribution and the PyPI built distribution (wheel) only contain code
+licensed under the Unlicense.
 
 Note: The manpages, shell completion (autocomplete) files etc. are
 available inside the source tarball
@@ -231,7 +234,7 @@ install or update to the nightly release before submitting a bug report:
     yt-dlp --update-to nightly
 
     # To install nightly with pip:
-    python3 -m pip install -U --pre "yt-dlp[default]"
+    python -m pip install -U --pre "yt-dlp[default]"
 
 When running a yt-dlp version that is older than 90 days, you will see a
 warning message suggesting to update to the latest version. You can
@@ -240,11 +243,12 @@ configuration file.
 
 DEPENDENCIES
 
-Python versions 3.9+ (CPython) and 3.11+ (PyPy) are supported. Other
+Python versions 3.10+ (CPython) and 3.11+ (PyPy) are supported. Other
 versions and implementations may or may not work correctly.
 
-While all the other dependencies are optional, ffmpeg and ffprobe are
-highly recommended
+While all the other dependencies are optional, ffmpeg, ffprobe,
+yt-dlp-ejs and a supported JavaScript runtime/engine are highly
+recommended
 
 Strongly recommended
 
@@ -260,6 +264,12 @@ Strongly recommended
 
     Important: What you need is ffmpeg binary, NOT the Python package of
     the same name
+
+-   yt-dlp-ejs - Required for full YouTube support. Licensed under
+    Unlicense, bundles MIT and ISC components.
+
+    A JavaScript runtime/engine like deno (recommended), node.js, bun,
+    or QuickJS is also required to run yt-dlp-ejs. See the wiki.
 
 Networking
 
@@ -280,7 +290,7 @@ may be required for some sites that employ TLS fingerprinting.
 -   curl_cffi (recommended) - Python binding for curl-impersonate.
     Provides impersonation targets for Chrome, Edge and Safari. Licensed
     under MIT
-    -   Can be installed with the curl-cffi group, e.g.
+    -   Can be installed with the curl-cffi extra, e.g.
         pip install "yt-dlp[default,curl-cffi]"
     -   Currently included in most builds except yt-dlp (Unix zipimport
         binary), yt-dlp_x86 (Windows 32-bit) and
@@ -299,8 +309,9 @@ Misc
 
 -   pycryptodomex* - For decrypting AES-128 HLS streams and various
     other data. Licensed under BSD-2-Clause
--   phantomjs - Used in extractors where javascript needs to be run.
-    Licensed under BSD-3-Clause
+-   phantomjs - Used in some extractors where JavaScript needs to be
+    run. No longer used for YouTube. To be deprecated in the near
+    future. Licensed under BSD-3-Clause
 -   secretstorage* - For --cookies-from-browser to access the Gnome
     keyring while decrypting cookies of Chromium-based browsers on
     Linux. Licensed under BSD-3-Clause
@@ -333,11 +344,11 @@ will be built for the same CPU architecture as the Python used.
 
 You can run the following commands:
 
-    python3 devscripts/install_deps.py --include pyinstaller
-    python3 devscripts/make_lazy_extractors.py
-    python3 -m bundle.pyinstaller
+    python devscripts/install_deps.py --include-extra pyinstaller
+    python devscripts/make_lazy_extractors.py
+    python -m bundle.pyinstaller
 
-On some systems, you may need to use py or python instead of python3.
+On some systems, you may need to use py or python3 instead of python.
 
 python -m bundle.pyinstaller accepts any arguments that can be passed to
 pyinstaller, such as --onefile/-F or --onedir/-D, which is further
@@ -352,7 +363,7 @@ may not work correctly.
 
 Platform-independent Binary (UNIX)
 
-You will need the build tools python (3.9+), zip, make (GNU), pandoc*
+You will need the build tools python (3.10+), zip, make (GNU), pandoc*
 and pytest*.
 
 After installing these, simply run make.
@@ -444,7 +455,7 @@ General Options:
                                     containing directory ("-" for stdin). Can be
                                     used multiple times and inside other
                                     configuration files
-    --plugin-dirs PATH              Path to an additional directory to search
+    --plugin-dirs DIR               Path to an additional directory to search
                                     for plugins. This option can be used
                                     multiple times to add multiple directories.
                                     Use "default" to search the default plugin
@@ -452,6 +463,37 @@ General Options:
     --no-plugin-dirs                Clear plugin directories to search,
                                     including defaults and those provided by
                                     previous --plugin-dirs
+    --js-runtimes RUNTIME[:PATH]    Additional JavaScript runtime to enable,
+                                    with an optional location for the runtime
+                                    (either the path to the binary or its
+                                    containing directory). This option can be
+                                    used multiple times to enable multiple
+                                    runtimes. Supported runtimes are (in order
+                                    of priority, from highest to lowest): deno,
+                                    node, quickjs, bun. Only "deno" is enabled
+                                    by default. The highest priority runtime
+                                    that is both enabled and available will be
+                                    used. In order to use a lower priority
+                                    runtime when "deno" is available, --no-js-
+                                    runtimes needs to be passed before enabling
+                                    other runtimes
+    --no-js-runtimes                Clear JavaScript runtimes to enable,
+                                    including defaults and those provided by
+                                    previous --js-runtimes
+    --remote-components COMPONENT   Remote components to allow yt-dlp to fetch
+                                    when required. This option is currently not
+                                    needed if you are using an official
+                                    executable or have the requisite version of
+                                    the yt-dlp-ejs package installed. You can
+                                    use this option multiple times to allow
+                                    multiple components. Supported values:
+                                    ejs:npm (external JavaScript components from
+                                    npm), ejs:github (external JavaScript
+                                    components from yt-dlp-ejs GitHub). By
+                                    default, no remote components are allowed
+    --no-remote-components          Disallow fetching of all remote components,
+                                    including any previously allowed by
+                                    --remote-components or defaults.
     --flat-playlist                 Do not extract a playlist's URL result
                                     entries; some entry metadata may be missing
                                     and downloading may be bypassed
@@ -539,7 +581,7 @@ Geo-restriction:
 
 Video Selection:
 
-    -I, --playlist-items ITEM_SPEC  Comma separated playlist_index of the items
+    -I, --playlist-items ITEM_SPEC  Comma-separated playlist_index of the items
                                     to download. You can specify a range using
                                     "[START]:[STOP][:STEP]". For backward
                                     compatibility, START-STOP is also supported.
@@ -921,6 +963,8 @@ Video Format Options:
                                     for more details
     -S, --format-sort SORTORDER     Sort the formats by the fields given, see
                                     "Sorting Formats" for more details
+    --format-sort-reset             Disregard previous user specified sort order
+                                    and reset to the default
     --format-sort-force             Force user specified sort order to have
                                     precedence over all fields, see "Sorting
                                     Formats" for more details (Alias: --S-force)
@@ -1183,11 +1227,12 @@ SponsorBlock API
                                     for, separated by commas. Available
                                     categories are sponsor, intro, outro,
                                     selfpromo, preview, filler, interaction,
-                                    music_offtopic, poi_highlight, chapter, all
-                                    and default (=all). You can prefix the
-                                    category with a "-" to exclude it. See [1]
-                                    for descriptions of the categories. E.g.
-                                    --sponsorblock-mark all,-preview
+                                    music_offtopic, hook, poi_highlight,
+                                    chapter, all and default (=all). You can
+                                    prefix the category with a "-" to exclude
+                                    it. See [1] for descriptions of the
+                                    categories. E.g. --sponsorblock-mark
+                                    all,-preview
                                     [1] https://wiki.sponsor.ajay.app/w/Segment_Categories
     --sponsorblock-remove CATS      SponsorBlock categories to be removed from
                                     the video file, separated by commas. If a
@@ -1256,7 +1301,7 @@ a configuration file. The configuration is loaded from the following
 locations:
 
 1.  Main Configuration:
-    -   The file given to --config-location
+    -   The file given to --config-locations
 2.  Portable Configuration: (Recommended for portable installations)
     -   If using a binary, yt-dlp.conf in the same directory as the
         binary
@@ -1371,7 +1416,7 @@ Notes about environment variables
     ${VARIABLE}/$VARIABLE on UNIX and %VARIABLE% on Windows; but is
     always shown as ${VARIABLE} in this documentation
 -   yt-dlp also allows using UNIX-style variables on Windows for
-    path-like options; e.g. --output, --config-location
+    path-like options; e.g. --output, --config-locations
 -   If unset, ${XDG_CONFIG_HOME} defaults to ~/.config and
     ${XDG_CACHE_HOME} to ~/.cache
 -   On Windows, ~ points to ${HOME} if present; or, ${USERPROFILE} or
@@ -1439,7 +1484,7 @@ have some special formatting:
 7.  More Conversions: In addition to the normal format types
     diouxXeEfFgGcrs, yt-dlp additionally supports converting to B =
     Bytes, j = json (flag # for pretty-printing, + for Unicode), h =
-    HTML escaping, l = a comma separated list (flag # for \n
+    HTML escaping, l = a comma-separated list (flag # for \n
     newline-separated), q = a string quoted for the terminal (flag # to
     split a list into different arguments), D = add Decimal suffixes
     (e.g. 10M) (flag # to use 1024 as factor), and S = Sanitize as
@@ -1520,6 +1565,8 @@ The available fields are:
 -   comment_count (numeric): Number of comments on the video (For some
     extractors, comments are only downloaded at the end, and so this
     field cannot be used)
+-   save_count (numeric): Number of times the video has been saved or
+    bookmarked
 -   age_limit (numeric): Age restriction for the video (years)
 -   live_status (string): One of "not_live", "is_live", "is_upcoming",
     "was_live", "post_live" (was live, but VOD is not yet processed)
@@ -1993,6 +2040,15 @@ respects. Most of the time, what you actually want is the video with the
 smallest filesize instead. So it is generally better to use
 -f best -S +size,+br,+res,+fps.
 
+If you use the -S/--format-sort option multiple times, each subsequent
+sorting argument will be prepended to the previous one, and only the
+highest priority entry of any duplicated field will be preserved. E.g.
+-S proto -S res is equivalent to -S res,proto, and
+-S res:720,fps -S vcodec,res:1080 is equivalent to
+-S vcodec,res:1080,fps. You can use --format-sort-reset to disregard any
+previously passed -S/--format-sort arguments and reset to the default
+order.
+
 Tip: You can use the -v -F to see how the formats have been sorted
 (worst to best).
 
@@ -2181,9 +2237,9 @@ metadata:
 
   composer                  composer or composers
 
-  genre                     genre or genres
+  genre                     genre, genres, categories or tags
 
-  album                     album
+  album                     album or series
 
   album_artist              album_artist or album_artists
 
@@ -2209,6 +2265,9 @@ Modifying metadata examples
 
     # Regex example
     $ yt-dlp --parse-metadata "description:Artist - (?P<artist>.+)"
+
+    # Copy the episode field to the title field (with FROM and TO as single fields)
+    $ yt-dlp --parse-metadata "episode:title"
 
     # Set title as "Series name S01E05"
     $ yt-dlp --parse-metadata "%(series)s S%(season_number)02dE%(episode_number)02d:%(title)s"
@@ -2253,20 +2312,25 @@ youtube
     respectively
 -   player_client: Clients to extract video data from. The currently
     available clients are web, web_safari, web_embedded, web_music,
-    web_creator, mweb, ios, android, android_vr, tv, tv_simply and
-    tv_embedded. By default, tv,web_safari,web is used, and
-    tv,web_creator,web is used with premium accounts. The web_music
-    client is added for music.youtube.com URLs when logged-in cookies
-    are used. The web_embedded client is added for age-restricted videos
-    but only works if the video is embeddable. The tv_embedded and
-    web_creator clients are added for age-restricted videos if account
-    age-verification is required. Some clients, such as web and
+    web_creator, mweb, ios, android, android_vr, tv, tv_downgraded, and
+    tv_simply. By default, android_vr,web,web_safari is used. If no
+    JavaScript runtime/engine is available, then only android_vr is
+    used. If logged-in cookies are passed to yt-dlp, then
+    tv_downgraded,web,web_safari is used for free accounts and
+    tv_downgraded,web_creator,web is used for premium accounts. The
+    web_music client is added for music.youtube.com URLs when logged-in
+    cookies are used. The web_embedded client is added for
+    age-restricted videos but only successfully works around the
+    age-restriction sometimes (e.g. if the video is embeddable), and may
+    be added as a fallback if android_vr is unable to access a video.
+    The web_creator client is added for age-restricted videos if account
+    age-verification is required. Some clients, such as web_creator and
     web_music, require a po_token for their formats to be downloadable.
     Some clients, such as web_creator, will only work with
     authentication. Not all clients support authentication via cookies.
     You can use default for the default clients, or you can use all for
     all clients (not recommended). You can prefix a client with - to
-    exclude it, e.g. youtube:player_client=default,-ios
+    exclude it, e.g. youtube:player_client=default,-web
 -   player_skip: Skip some network requests that are generally needed
     for robust extraction. One or more of configs (skip client configs),
     webpage (skip initial webpage), js (skip js player), initial_data
@@ -2281,22 +2345,26 @@ youtube
     Will overwrite any default ones set by yt-dlp.
 -   player_js_variant: The player javascript variant to use for n/sig
     deciphering. The known variants are: main, tcc, tce, es5, es6, tv,
-    tv_es6, phone, tablet. The default is main, and the others are for
-    debugging purposes. You can use actual to go with what is prescribed
-    by the site
+    tv_es6, phone. The default is tv, and the others are for debugging
+    purposes. You can use actual to go with what is prescribed by the
+    site
 -   player_js_version: The player javascript version to use for n/sig
-    deciphering, in the format of signature_timestamp@hash. Currently,
-    the default is to force 20348@0004de42. You can use actual to go
-    with what is prescribed by the site
+    deciphering, in the format of signature_timestamp@hash (e.g.
+    20348@0004de42). The default is to use what is prescribed by the
+    site, and can be selected with actual
 -   comment_sort: top or new (default) - choose comment sorting mode (on
     YouTube's side)
 -   max_comments: Limit the amount of comments to gather.
     Comma-separated list of integers representing
-    max-comments,max-parents,max-replies,max-replies-per-thread. Default
-    is all,all,all,all
-    -   E.g. all,all,1000,10 will get a maximum of 1000 replies total,
-        with up to 10 replies per thread. 1000,all,100 will get a
-        maximum of 1000 comments, with a maximum of 100 replies total
+    max-comments,max-parents,max-replies,max-replies-per-thread,max-depth.
+    Default is all,all,all,all,all
+    -   A max-depth value of 1 will discard all replies, regardless of
+        the max-replies or max-replies-per-thread values given
+    -   E.g. all,all,1000,10,2 will get a maximum of 1000 replies total,
+        with up to 10 replies per thread, and only 2 levels of depth
+        (i.e. top-level comments plus their immediate replies).
+        1000,all,100 will get a maximum of 1000 comments, with a maximum
+        of 100 replies total
 -   formats: Change the types of formats to return. dashy (convert HTTP
     to DASH), duplicate (identical content but different URLs or
     protocol; includes dashy), incomplete (cannot be downloaded
@@ -2317,7 +2385,7 @@ youtube
     without cookies. Note: this may have adverse effects if used
     improperly. If a session from a browser is wanted, you should pass
     cookies instead (which contain the Visitor ID)
--   po_token: Proof of Origin (PO) Token(s) to use. Comma seperated list
+-   po_token: Proof of Origin (PO) Token(s) to use. Comma-separated list
     of PO Tokens in the format CLIENT.CONTEXT+PO_TOKEN, e.g.
     youtube:po_token=web.gvs+XXX,web.player=XXX,web_safari.gvs+YYY.
     Context can be any of gvs (Google Video Server URLs), player
@@ -2329,9 +2397,20 @@ youtube
     requires one for the given context), never (never fetch a PO Token),
     or auto (default; only fetch a PO Token if the client requires one
     for the given context)
--   playback_wait: Duration (in seconds) to wait inbetween the
-    extraction and download stages in order to ensure the formats are
-    available. The default is 6 seconds
+-   jsc_trace: Enable debug logging for JS Challenge fetching. Either
+    true or false (default)
+-   use_ad_playback_context: Skip preroll ads to eliminate the mandatory
+    wait period before download. Do NOT use this when passing premium
+    account cookies to yt-dlp, as it will result in a loss of premium
+    formats. Only effective with the web, web_safari, web_music and mweb
+    player clients. Either true or false (default)
+
+youtube-ejs
+
+-   jitless: Run supported Javascript engines in JIT-less mode.
+    Supported runtimes are deno, node and bun. Provides better security
+    at the cost of performance/speed. Do note that node and bun are
+    still considered insecure. Either true or false (default)
 
 youtubepot-webpo
 
@@ -2513,10 +2592,11 @@ tver
 vimeo
 
 -   client: Client to extract video data from. The currently available
-    clients are android, ios, and web. Only one client can be used. The
-    web client is used by default. The web client only works with
-    account cookies or login credentials. The android and ios clients
-    only work with previously cached OAuth tokens
+    clients are android, ios, macos and web. Only one client can be
+    used. The macos client is used by default, but the web client is
+    used when logged-in. The web client only works with account cookies
+    or login credentials. The android and ios clients only work with
+    previously cached OAuth tokens
 -   original_format_policy: Policy for when to try extracting original
     formats. One of always, never, or auto. The default auto policy
     tries to avoid exceeding the web client's API rate-limit by only
@@ -2919,7 +2999,7 @@ Differences in default behavior
 Some of yt-dlp's default options are different from that of youtube-dl
 and youtube-dlc:
 
--   yt-dlp supports only Python 3.9+, and will remove support for more
+-   yt-dlp supports only Python 3.10+, and will remove support for more
     versions as they become EOL; while youtube-dl still supports Python
     2.6+ and 3.2+
 -   The options --auto-number (-A), --title (-t) and --literal (-l), no
@@ -3030,7 +3110,7 @@ and youtube-dlc:
     files by default. Use --mtime or --compat-options mtime-by-default
     to revert this.
 
-For ease of use, a few more compat options are available:
+For convenience, there are some compat option aliases available to use:
 
 -   --compat-options all: Use all compat options (Do NOT use this!)
 -   --compat-options youtube-dl: Same as
@@ -3042,8 +3122,13 @@ For ease of use, a few more compat options are available:
 -   --compat-options 2022: Same as
     --compat-options 2023,playlist-match-filter,no-external-downloader-progress,prefer-legacy-http-handler,manifest-filesize-approx
 -   --compat-options 2023: Same as --compat-options 2024,prefer-vp9-sort
--   --compat-options 2024: Same as --compat-options mtime-by-default.
-    Use this to enable all future compat options
+-   --compat-options 2024: Same as
+    --compat-options 2025,mtime-by-default
+-   --compat-options 2025: Currently does nothing. Use this to enable
+    all future compat options
+
+Using one of the yearly compat option aliases will pin yt-dlp's default
+behavior to what it was at the end of that calendar year.
 
 The following compat options restore vulnerable behavior from before
 security patches:
